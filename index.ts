@@ -1,6 +1,9 @@
-enum OpCode {
+export enum OpCode {
     STOP = "STOP",
     ADD = "ADD",
+    SUB = "SUB",
+    MUL = "MUL",
+    DIV = "DIV",
     PUSH = "PUSH"
 }
 
@@ -12,7 +15,7 @@ interface InterpreterState {
     code: CodeSymbol[]
 }
 
-class Interpreter {
+export class Interpreter {
     private state: InterpreterState;
     constructor() {
         this.state = {
@@ -32,13 +35,27 @@ class Interpreter {
                 throw new Error("Execution complete")
 
             case OpCode.ADD:
+            case OpCode.SUB:
+            case OpCode.DIV:
+            case OpCode.MUL:
                 if (this.state.stack.length < 2) {
                     throw new Error("Not enough elements in stack");
                 }
 
-                const a = this.state.stack.pop() as number;
+                // The top element is the second operand, and the 
                 const b = this.state.stack.pop() as number;
-                this.state.stack.push(a + b);
+                const a = this.state.stack.pop() as number;
+                let result: number;
+                if (opCode == OpCode.ADD)
+                    result = a + b;
+                else if (opCode == OpCode.SUB)
+                    result = a - b;
+                else if (opCode == OpCode.DIV)
+                    result = a / b;
+                else
+                    result = a * b;
+
+                this.state.stack.push(result);
                 break
 
             case OpCode.PUSH:
@@ -69,7 +86,3 @@ class Interpreter {
         }
     }
 }
-
-const int = new Interpreter();
-let code: CodeSymbol[] = [OpCode.PUSH, 1, OpCode.PUSH, 2, OpCode.ADD, OpCode.STOP];
-console.log(int.runCode(code));

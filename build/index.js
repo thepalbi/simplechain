@@ -3,6 +3,9 @@ var OpCode;
 (function (OpCode) {
     OpCode["STOP"] = "STOP";
     OpCode["ADD"] = "ADD";
+    OpCode["SUB"] = "ADD";
+    OpCode["MUL"] = "ADD";
+    OpCode["DIV"] = "DIV";
     OpCode["PUSH"] = "PUSH";
 })(OpCode || (OpCode = {}));
 var Interpreter = /** @class */ (function () {
@@ -20,13 +23,22 @@ var Interpreter = /** @class */ (function () {
         switch (opCode) {
             case OpCode.STOP:
                 throw new Error("Execution complete");
-            case OpCode.ADD:
+            case (OpCode.ADD, OpCode.SUB, OpCode.DIV, OpCode.MUL):
                 if (this.state.stack.length < 2) {
                     throw new Error("Not enough elements in stack");
                 }
                 var a = this.state.stack.pop();
                 var b = this.state.stack.pop();
-                this.state.stack.push(a + b);
+                var result = void 0;
+                if (opCode == OpCode.ADD)
+                    result = a + b;
+                else if (opCode == OpCode.SUB)
+                    result = a - b;
+                else if (opCode == OpCode.DIV)
+                    result = a / b;
+                else
+                    result = a * b;
+                this.state.stack.push(result);
                 break;
             case OpCode.PUSH:
                 this.state.programCounter++;
@@ -54,6 +66,11 @@ var Interpreter = /** @class */ (function () {
     };
     return Interpreter;
 }());
-var int = new Interpreter();
 var code = [OpCode.PUSH, 1, OpCode.PUSH, 2, OpCode.ADD, OpCode.STOP];
-console.log(int.runCode(code));
+console.log("Result of 1 ADD 2: %d", new Interpreter().runCode(code));
+code = [OpCode.PUSH, 1, OpCode.PUSH, 2, OpCode.SUB, OpCode.STOP];
+console.log("Result of 1 SUB 2: %d", new Interpreter().runCode(code));
+code = [OpCode.PUSH, 1, OpCode.PUSH, 2, OpCode.DIV, OpCode.STOP];
+console.log("Result of 1 DIV 2: %d", new Interpreter().runCode(code));
+code = [OpCode.PUSH, 1, OpCode.PUSH, 2, OpCode.MUL, OpCode.STOP];
+console.log("Result of 1 MUL 2: %d", new Interpreter().runCode(code));
