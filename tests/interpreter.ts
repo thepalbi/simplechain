@@ -1,10 +1,10 @@
-import {expect} from "chai";
+import { expect } from "chai";
 import { Interpreter, OpCode } from "..";
 
 describe("Interpreter tests", () => {
     let int = new Interpreter();
 
-    let generateCode = (arithOpCode: OpCode) => 
+    let generateCode = (arithOpCode: OpCode) =>
         [OpCode.PUSH, 3, OpCode.PUSH, 1, arithOpCode, OpCode.STOP];
 
     let cases: [OpCode, number][] = [
