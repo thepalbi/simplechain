@@ -4,20 +4,27 @@ import { Interpreter, OpCode } from "..";
 describe("Interpreter tests", () => {
     let int = new Interpreter();
 
-    let generateCode = (arithOpCode: OpCode) =>
-        [OpCode.PUSH, 3, OpCode.PUSH, 1, arithOpCode, OpCode.STOP];
+    let generateCode = (a: number, b: number, arithOrCompOpCode: OpCode) =>
+        [OpCode.PUSH, b, OpCode.PUSH, a, arithOrCompOpCode, OpCode.STOP];
 
-    let cases: [OpCode, number][] = [
-        [OpCode.ADD, 4],
-        [OpCode.SUB, 2],
-        [OpCode.DIV, 3],
-        [OpCode.MUL, 3]
+    let cases: [number, number, OpCode, number, string?][] = [
+        [1, 3, OpCode.ADD, 4],
+        [3, 1, OpCode.SUB, 2],
+        [3, 1, OpCode.DIV, 3],
+        [3, 1, OpCode.LT, 0],
+        [5, 1, OpCode.GT, 1],
+        [1, 1, OpCode.AND, 1],
+        [0, 1, OpCode.AND, 0, "False scneario"],
+        [1, 0, OpCode.OR, 1],
+        [10, 12, OpCode.EQ, 0],
+        [12, 12, OpCode.EQ, 1, "Equal scneario"],
     ];
-    cases.forEach(([arithOpCode, expectedRes]) => {
-        it(`Arithmetic operations: ${arithOpCode.toString()}`, () => {
-            let result = new Interpreter().runCode(generateCode(arithOpCode));
-            expect(result).to.equal(expectedRes);
-        })
+    cases.forEach(([a, b, arithOrCompOpCode, expectedRes, note]) => {
+        it(`Operation: ${arithOrCompOpCode.toString()}${note !== undefined ? " - ".concat(note) : ""}`,
+            () => {
+                let result = new Interpreter().runCode(generateCode(a, b, arithOrCompOpCode));
+                expect(result).to.equal(expectedRes);
+            })
     });
 
     it("Push operation", () => {
