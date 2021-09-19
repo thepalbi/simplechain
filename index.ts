@@ -1,18 +1,10 @@
-export enum OpCode {
-    STOP = "STOP",
-    ADD = "ADD",
-    SUB = "SUB",
-    MUL = "MUL",
-    DIV = "DIV",
-    PUSH = "PUSH",
-    LT = "LE",
-    GT = "GT",
-    EQ = "EQ",
-    AND = "AND",
-    OR = "OR"
-}
+export type OpCode =
+    "STOP" |
+    "ADD" | "SUB" | "MUL" | "DIV" |
+    "PUSH" |
+    "LT" | "GT" | "EQ" | "AND" | "OR"
 
-type CodeSymbol = OpCode | number
+export type CodeSymbol = OpCode | number
 
 interface InterpreterState {
     programCounter: number
@@ -36,20 +28,20 @@ export class Interpreter {
 
     private handleOpCode(opCode: CodeSymbol) {
         switch (opCode) {
-            case OpCode.STOP:
+            case "STOP":
                 throw new Error("Execution complete")
 
             // Arithmetic operations
-            case OpCode.ADD:
-            case OpCode.SUB:
-            case OpCode.DIV:
-            case OpCode.MUL:
+            case "ADD":
+            case "SUB":
+            case "DIV":
+            case "MUL":
             // Comparisons
-            case OpCode.EQ:
-            case OpCode.LT:
-            case OpCode.GT:
-            case OpCode.AND:
-            case OpCode.OR:
+            case "EQ":
+            case "LT":
+            case "GT":
+            case "AND":
+            case "OR":
                 if (this.state.stack.length < 2) {
                     throw new Error("Not enough elements in stack");
                 }
@@ -58,22 +50,22 @@ export class Interpreter {
                 const a = this.state.stack.pop() as number;
                 const b = this.state.stack.pop() as number;
                 let result: number;
-                if (opCode == OpCode.ADD) result = a + b;
-                else if (opCode == OpCode.SUB) result = a - b;
-                else if (opCode == OpCode.DIV) result = a / b;
-                else if (opCode == OpCode.MUL) result = a * b;
+                if (opCode == "ADD") result = a + b;
+                else if (opCode == "SUB") result = a - b;
+                else if (opCode == "DIV") result = a / b;
+                else if (opCode == "MUL") result = a * b;
 
-                else if (opCode == OpCode.EQ) result = a === b ? 1 : 0;
-                else if (opCode == OpCode.LT) result = a < b ? 1 : 0;
-                else if (opCode == OpCode.GT) result = a > b ? 1 : 0;
-                else if (opCode == OpCode.AND) result = (a === 1 && b === 1) ? 1 : 0;
+                else if (opCode == "EQ") result = a === b ? 1 : 0;
+                else if (opCode == "LT") result = a < b ? 1 : 0;
+                else if (opCode == "GT") result = a > b ? 1 : 0;
+                else if (opCode == "AND") result = (a === 1 && b === 1) ? 1 : 0;
                 // Remaining: OR
                 else result = (a === 1 || b === 1) ? 1 : 0;
 
                 this.state.stack.push(result);
                 break
 
-            case OpCode.PUSH:
+            case "PUSH":
                 this.state.programCounter++;
                 const value = this.extractCurrentCodeSymbol();
                 if (typeof value !== "number")
