@@ -3,7 +3,7 @@ export type OpCode =
     "ADD" | "SUB" | "MUL" | "DIV" |
     "PUSH" |
     "LT" | "GT" | "EQ" | "AND" | "OR" |
-    "JUMP"
+    "JUMP" | "JUMPI"
 
 export type CodeSymbol = OpCode | number
 
@@ -77,13 +77,24 @@ export class Interpreter {
 
             case "JUMP":
                 if (this.state.stack.length < 1) throw new Error("Empty stack");
-                const destination = this.state.stack.pop() as number;
-                this.state.programCounter = destination;
-                this.state.programCounter--;
+                this.jump();
                 break;
+
+            case "JUMPI":
+                if (this.state.stack.length < 2) throw new Error("Empty stack");
+                const condition = this.state.stack.pop();
+                if (condition === 1) this.jump();
+                break;
+
             default:
                 break;
         }
+    }
+
+    private jump() {
+        const destination = this.state.stack.pop() as number;
+        this.state.programCounter = destination;
+        this.state.programCounter--;
     }
 
     public runCode(code: CodeSymbol[]) {

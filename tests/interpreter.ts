@@ -35,6 +35,12 @@ describe("Interpreter tests", () => {
     it("Push operation", () =>
         runCodeAndExpectResult(["PUSH", 5, "STOP"], 5));
 
-    it("JUMP tests", () =>
-        runCodeAndExpectResult(["PUSH", 5, "JUMP", "PUSH", 5, "PUSH", 4, "STOP"], 4));
+    it("JUMP alters return value", () =>
+        runCodeAndExpectResult(["PUSH", 6, "JUMP", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 4));
+
+    it("JUMPI takes jump", () =>
+        runCodeAndExpectResult(["PUSH", 8, "PUSH", 1, "JUMPI", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 4));
+
+    it("JUMPI doesnt takes jump", () =>
+        runCodeAndExpectResult(["PUSH", 8, "PUSH", 0, "JUMPI", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 5));
 })
