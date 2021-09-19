@@ -18,5 +18,11 @@ describe("Interpreter tests", () => {
             let result = new Interpreter().runCode(generateCode(arithOpCode));
             expect(result).to.equal(expectedRes);
         })
-    })
+    });
+
+    it("Push operation", () => {
+        let code = [OpCode.PUSH, 5, OpCode.STOP];
+        let res = new Interpreter().runCode(code);
+        expect(res).to.equal(5);
+    });
 })
