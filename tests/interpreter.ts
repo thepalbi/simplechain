@@ -1,6 +1,11 @@
 import { expect } from "chai";
 import { CodeSymbol, Interpreter, OpCode } from "..";
 
+function runCodeAndExpectResult(code: CodeSymbol[], expectedResult: number) {
+    let res = new Interpreter().runCode(code);
+    expect(res).to.equal(expectedResult);
+}
+
 describe("Interpreter tests", () => {
     let int = new Interpreter();
 
@@ -27,9 +32,9 @@ describe("Interpreter tests", () => {
             })
     });
 
-    it("Push operation", () => {
-        let code: CodeSymbol[] = ["PUSH", 5, "STOP"];
-        let res = new Interpreter().runCode(code);
-        expect(res).to.equal(5);
-    });
+    it("Push operation", () =>
+        runCodeAndExpectResult(["PUSH", 5, "STOP"], 5));
+
+    it("JUMP tests", () =>
+        runCodeAndExpectResult(["PUSH", 5, "JUMP", "PUSH", 5, "PUSH", 4, "STOP"], 4));
 })

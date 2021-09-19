@@ -2,7 +2,8 @@ export type OpCode =
     "STOP" |
     "ADD" | "SUB" | "MUL" | "DIV" |
     "PUSH" |
-    "LT" | "GT" | "EQ" | "AND" | "OR"
+    "LT" | "GT" | "EQ" | "AND" | "OR" |
+    "JUMP"
 
 export type CodeSymbol = OpCode | number
 
@@ -74,6 +75,12 @@ export class Interpreter {
                 this.state.stack.push(value);
                 break;
 
+            case "JUMP":
+                if (this.state.stack.length < 1) throw new Error("Empty stack");
+                const destination = this.state.stack.pop() as number;
+                this.state.programCounter = destination;
+                this.state.programCounter--;
+                break;
             default:
                 break;
         }
