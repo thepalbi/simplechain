@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { CodeSymbol, Interpreter, OpCode } from "..";
+import { CodeSymbol, Interpreter, OpCode } from "../interpreter";
 
 function runCodeAndExpectResult(code: CodeSymbol[], expectedResult: number) {
     let res = new Interpreter().runCode(code);
