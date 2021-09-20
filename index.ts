@@ -70,6 +70,9 @@ export class Interpreter {
 
             case "PUSH":
                 this.state.programCounter++;
+                if (this.state.programCounter >= this.state.code.length)
+                    throw new Error("No element to PUSH");
+
                 const value = this.extractCurrentCodeSymbol();
                 if (typeof value !== "number")
                     throw new Error("Cannot push non-number element");
@@ -95,7 +98,7 @@ export class Interpreter {
 
     private jump() {
         const destination = this.state.stack.pop() as number;
-        if (destination <= 0 || destination >= this.state.code.length)
+        if (destination < 0 || destination >= this.state.code.length)
             throw new Error("Out of bounds jump destination");
         this.state.programCounter = destination;
         this.state.programCounter--;

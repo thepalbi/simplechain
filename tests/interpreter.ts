@@ -35,13 +35,17 @@ describe("Interpreter tests", () => {
     it("Push operation", () =>
         runCodeAndExpectResult(["PUSH", 5, "STOP"], 5));
 
+    it("Push operation with out of bounds error", () => {
+        expect(() => new Interpreter().runCode(["PUSH"])).to.throw("No element to PUSH")
+    });
+
     it("JUMP alters return value", () =>
         runCodeAndExpectResult(["PUSH", 6, "JUMP", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 4));
 
     let jumpOutOfBoundsCases: [number, string][] = [[-5, "negative location"], [19, "greater than code size"]];
     jumpOutOfBoundsCases.forEach(([outOfBoundsLocation, note]) =>
         it(`JUMP to out of bounds location fails - ${note}`, () =>
-            expect(() => runCodeAndExpectResult(["PUSH", outOfBoundsLocation, "JUMP", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 4)
+            expect(() => new Interpreter().runCode(["PUSH", outOfBoundsLocation, "JUMP", "PUSH", 5, "STOP", "PUSH", 4, "STOP"])
             ).to.throw("Out of bounds jump destination")
         )
     );
@@ -51,4 +55,10 @@ describe("Interpreter tests", () => {
 
     it("JUMPI doesnt takes jump", () =>
         runCodeAndExpectResult(["PUSH", 8, "PUSH", 0, "JUMPI", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 5));
+
+    it("Infinit loops should fail", function () {
+        //@ts-ignore
+        this.timeout(2000);
+        expect(() => new Interpreter().runCode(["PUSH", 0, "JUMP"])).to.throw("Execution cound limit reached!");
+    });
 })
