@@ -8,17 +8,20 @@ export type OpCode =
 export type CodeSymbol = OpCode | number
 
 interface InterpreterState {
+    executionCount: number
     programCounter: number
     stack: number[]
     code: CodeSymbol[]
 }
 
 const EXECUTION_COMPLETE_ERROR_MESSAGE = "EXECUTION_COMPLETE";
+const EXECUTION_COUNT_LIMIT = 10000;
 
 export class Interpreter {
     private state: InterpreterState;
     constructor() {
         this.state = {
+            executionCount: 0,
             programCounter: 0,
             stack: [],
             code: []
@@ -109,8 +112,12 @@ export class Interpreter {
 
         while (this.state.programCounter < this.state.code.length) {
             try {
+                if (this.state.executionCount > EXECUTION_COUNT_LIMIT)
+                    throw new Error("Execution cound limit reached!");
+
                 const opCode = this.extractCurrentCodeSymbol();
                 this.handleOpCode(opCode);
+                this.state.executionCount++;
                 this.state.programCounter++;
             } catch (error) {
                 let err = error as Error;

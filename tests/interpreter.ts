@@ -59,6 +59,7 @@ describe("Interpreter tests", () => {
     it("Infinit loops should fail", function () {
         //@ts-ignore
         this.timeout(2000);
+        // TODO: The timeout above doesn't work as expected
         expect(() => new Interpreter().runCode(["PUSH", 0, "JUMP"])).to.throw("Execution cound limit reached!");
     });
 })
