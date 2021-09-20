@@ -13,6 +13,8 @@ interface InterpreterState {
     code: CodeSymbol[]
 }
 
+const EXECUTION_COMPLETE_ERROR_MESSAGE = "EXECUTION_COMPLETE";
+
 export class Interpreter {
     private state: InterpreterState;
     constructor() {
@@ -30,7 +32,7 @@ export class Interpreter {
     private handleOpCode(opCode: CodeSymbol) {
         switch (opCode) {
             case "STOP":
-                throw new Error("Execution complete")
+                throw new Error(EXECUTION_COMPLETE_ERROR_MESSAGE);
 
             // Arithmetic operations
             case "ADD":
@@ -93,6 +95,8 @@ export class Interpreter {
 
     private jump() {
         const destination = this.state.stack.pop() as number;
+        if (destination <= 0 || destination >= this.state.code.length)
+            throw new Error("Out of bounds jump destination");
         this.state.programCounter = destination;
         this.state.programCounter--;
     }
@@ -106,7 +110,11 @@ export class Interpreter {
                 this.handleOpCode(opCode);
                 this.state.programCounter++;
             } catch (error) {
-                return this.state.stack.pop();
+                let err = error as Error;
+                if (err.message === EXECUTION_COMPLETE_ERROR_MESSAGE)
+                    return this.state.stack.pop();
+
+                throw error;
             }
         }
     }

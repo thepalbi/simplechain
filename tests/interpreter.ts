@@ -10,7 +10,7 @@ describe("Interpreter tests", () => {
     let int = new Interpreter();
 
     let generateCode = (a: number, b: number, arithOrCompOpCode: OpCode): CodeSymbol[] =>
-        ["PUSH", b, "PUSH", a, arithOrCompOpCode, "PUSH"];
+        ["PUSH", b, "PUSH", a, arithOrCompOpCode, "STOP"];
 
     let cases: [number, number, OpCode, number, string?][] = [
         [1, 3, "ADD", 4],
@@ -37,6 +37,14 @@ describe("Interpreter tests", () => {
 
     it("JUMP alters return value", () =>
         runCodeAndExpectResult(["PUSH", 6, "JUMP", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 4));
+
+    let jumpOutOfBoundsCases: [number, string][] = [[-5, "negative location"], [19, "greater than code size"]];
+    jumpOutOfBoundsCases.forEach(([outOfBoundsLocation, note]) =>
+        it(`JUMP to out of bounds location fails - ${note}`, () =>
+            expect(() => runCodeAndExpectResult(["PUSH", outOfBoundsLocation, "JUMP", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 4)
+            ).to.throw("Out of bounds jump destination")
+        )
+    );
 
     it("JUMPI takes jump", () =>
         runCodeAndExpectResult(["PUSH", 8, "PUSH", 1, "JUMPI", "PUSH", 5, "STOP", "PUSH", 4, "STOP"], 4));
