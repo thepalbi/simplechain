@@ -2,7 +2,7 @@ import { keccak256 } from "js-sha3";
 import { GENESIS_DATA, MINE_RATE } from "../config";
 import { hash as keccakHash } from "../util";
 
-interface TruncatedBlockHeaders {
+export interface TruncatedBlockHeaders {
 	parentHash: string
 	beneficiary: string
 	difficulty: number
@@ -46,7 +46,7 @@ export class Block {
 			truncatedBlockHeaders = {
 				parentHash: keccakHash(lastBlock.blockHeaders),
 				beneficiary,
-				difficulty: Block.adjustDifficulty({lastBlock, timestamp}),
+				difficulty: Block.adjustDifficulty({ lastBlock, timestamp }),
 				number: lastBlock.blockHeaders.number + 1,
 				timestamp: timestamp
 			};
@@ -79,5 +79,38 @@ export class Block {
 
 	static genesis() {
 		return new Block(GENESIS_DATA);
+	}
+
+	static validateBlock({ lastBlock, block }: { lastBlock?: Block, block: Block }): Promise<any> {
+		return new Promise((resolve, reject) => {
+			if (keccakHash(block) === keccakHash(Block.genesis())) {
+				return resolve(null);
+			}
+			if (lastBlock === undefined) {
+				return reject(new Error("Cannot validate block without lastBlock"));
+			}
+			if (keccakHash(lastBlock.blockHeaders) !== block.blockHeaders.parentHash) {
+				return reject(new Error("Parent hash doesn't match last block headers"));
+			}
+			if (block.blockHeaders.number !== lastBlock.blockHeaders.number + 1) {
+				return reject(new Error("Block number must be the following of lastBlock's number"));
+			}
+			if (Math.abs(lastBlock.blockHeaders.difficulty - block.blockHeaders.difficulty) > 1) {
+				return reject(new Error("Difficulty can only change by 1 between blocks"));
+			}
+
+			// Mine block break condition
+			const { nonce } = block.blockHeaders;
+			let truncatedBlockHeaders: TruncatedBlockHeaders = block.blockHeaders;
+			//@ts-ignore
+			delete truncatedBlockHeaders.nonce;
+			const headersHash = keccakHash(truncatedBlockHeaders);
+			const underTargetHash = keccakHash(headersHash + nonce);
+			if (underTargetHash > Block.calculateBlockTargetHash({ lastBlock })) {
+				return reject(new Error("Block does not meet PoW requirement"));
+			}
+
+			return resolve(null);
+		});
 	}
 }
