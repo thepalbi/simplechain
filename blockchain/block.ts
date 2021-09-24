@@ -1,5 +1,5 @@
 import { keccak256 } from "js-sha3";
-import { GENESIS_DATA } from "../config";
+import { GENESIS_DATA, MINE_RATE } from "../config";
 import { hash as keccakHash } from "../util";
 
 interface TruncatedBlockHeaders {
@@ -7,7 +7,7 @@ interface TruncatedBlockHeaders {
 	beneficiary: string
 	difficulty: number
 	number: number
-	timestamp: string
+	timestamp: number
 }
 
 interface BlockHeaders extends TruncatedBlockHeaders {
@@ -46,9 +46,9 @@ export class Block {
 			truncatedBlockHeaders = {
 				parentHash: keccakHash(lastBlock.blockHeaders),
 				beneficiary,
-				difficulty: lastBlock.blockHeaders.difficulty + 1,
+				difficulty: Block.adjustDifficulty({lastBlock, timestamp}),
 				number: lastBlock.blockHeaders.number + 1,
-				timestamp: timestamp.toString()
+				timestamp: timestamp
 			};
 			header = keccakHash(truncatedBlockHeaders);
 
@@ -65,6 +65,18 @@ export class Block {
 				nonce: nonce,
 			}
 		});
+	}
+
+	static adjustDifficulty({ lastBlock, timestamp }: { lastBlock: Block, timestamp: number }) {
+		let { difficulty } = lastBlock.blockHeaders;
+
+		if (difficulty < 1) return 1;
+
+		if ((timestamp - lastBlock.blockHeaders.timestamp) > MINE_RATE) {
+			return difficulty - 1;
+		}
+
+		return difficulty + 1;
 	}
 
 	static genesis() {
