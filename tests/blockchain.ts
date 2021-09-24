@@ -1,5 +1,6 @@
 import { expect } from "chai";
 import { Block } from "../blockchain/block";
+import { hash as keccakHash } from "../util";
 
 describe("Block", function () {
     describe("calculateBlockTargetHash()", function () {
@@ -23,6 +24,30 @@ describe("Block", function () {
             });
             expect(result).to.have.length(64);
             expect(result.startsWith("0")).to.be.true;
+        });
+    });
+
+    describe("mineBlock()", function () {
+        let lastBlock: Block, minedBlock: Block;
+        this.beforeEach(() => {
+            lastBlock = Block.genesis();
+            minedBlock = Block.mineBlock({
+                lastBlock,
+                beneficiary: "foo",
+            });
+        });
+
+        it("Mined block has according block headers and validates challenge", function () {
+            let blockTargetHash = Block.calculateBlockTargetHash({ lastBlock });
+            // New block header assertions
+            expect(minedBlock.blockHeaders.number).to.be.equal(lastBlock.blockHeaders.number + 1);
+            expect(minedBlock.blockHeaders.parentHash).to.be.equal(keccakHash(lastBlock.blockHeaders));
+            expect(minedBlock.blockHeaders.beneficiary).to.be.equal("foo");
+            // Mine block break condition
+            expect(
+                keccakHash(keccakHash(minedBlock.blockHeaders) + minedBlock.blockHeaders.number)
+                <= blockTargetHash)
+                .to.be.true;
         });
     });
 })

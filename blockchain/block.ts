@@ -23,7 +23,7 @@ const MAX_HASH_VALUE = parseInt("f".repeat(HASH_LENGTH), 16);
 const MAX_NONCE_VALUE = 2 ** 64;
 
 export class Block {
-	private blockHeaders: BlockHeaders;
+	public blockHeaders: BlockHeaders;
 
 	constructor(props: BlockProps) {
 		this.blockHeaders = props.blockHeaders;
@@ -38,32 +38,33 @@ export class Block {
 		return "0".repeat(HASH_LENGTH - value.length) + value;
 	}
 
-	static mineBlock({ lastBlock, beneficiary }: { lastBlock: Block, beneficiary: string }): Block | undefined {
+	static mineBlock({ lastBlock, beneficiary }: { lastBlock: Block, beneficiary: string }): Block {
 		const target = Block.calculateBlockTargetHash({ lastBlock });
-		let timestamp: number, truncatedBlockHeaders: TruncatedBlockHeaders, header: string, nonce: number;
-		timestamp = Date.now();
-		truncatedBlockHeaders = {
-			parentHash: keccakHash(lastBlock.blockHeaders),
-			beneficiary,
-			difficulty: lastBlock.blockHeaders.difficulty + 1,
-			number: lastBlock.blockHeaders.number + 1,
-			timestamp: timestamp.toString()
-		};
-		header = keccakHash(truncatedBlockHeaders);
-		nonce = Math.floor(Math.random() * MAX_NONCE_VALUE);
-		const underTargetHash = keccakHash(header + nonce);
+		let timestamp: number, truncatedBlockHeaders: TruncatedBlockHeaders, header: string, nonce: number, underTargetHash: string;
+		do {
+			timestamp = Date.now();
+			truncatedBlockHeaders = {
+				parentHash: keccakHash(lastBlock.blockHeaders),
+				beneficiary,
+				difficulty: lastBlock.blockHeaders.difficulty + 1,
+				number: lastBlock.blockHeaders.number + 1,
+				timestamp: timestamp.toString()
+			};
+			header = keccakHash(truncatedBlockHeaders);
 
-		console.log("Target hash: %s", target);
-		console.log("Under target hash: %s", underTargetHash);
+			nonce = Math.floor(Math.random() * MAX_NONCE_VALUE);
 
-		if (underTargetHash < target) {
-			return new Block({
-				blockHeaders: {
-					...truncatedBlockHeaders,
-					nonce: nonce,
-				}
-			});
-		}
+			underTargetHash = keccakHash(header + nonce);
+			console.log("Target hash: %s", target);
+			console.log("Under target hash: %s", underTargetHash);
+		} while (underTargetHash > target);
+
+		return new Block({
+			blockHeaders: {
+				...truncatedBlockHeaders,
+				nonce: nonce,
+			}
+		});
 	}
 
 	static genesis() {
