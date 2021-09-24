@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Block } from "../blockchain/block";
+import { Block, TruncatedBlockHeaders } from "../blockchain/block";
 import { SECONDS } from "../config";
 import { hash as keccakHash } from "../util";
 
@@ -52,10 +52,14 @@ describe("Block", function () {
             expect(minedBlock.blockHeaders.parentHash).to.be.equal(keccakHash(lastBlock.blockHeaders));
             expect(minedBlock.blockHeaders.beneficiary).to.be.equal("foo");
             // Mine block break condition
-            expect(
-                keccakHash(keccakHash(minedBlock.blockHeaders) + minedBlock.blockHeaders.number)
-                <= blockTargetHash)
-                .to.be.true;
+            const { nonce } = minedBlock.blockHeaders;
+            let truncatedBlockHeaders: TruncatedBlockHeaders = minedBlock.blockHeaders;
+            //@ts-ignore
+            delete truncatedBlockHeaders.nonce;
+            const headersHash = keccakHash(truncatedBlockHeaders);
+            const underTargetHash = keccakHash(headersHash + nonce);
+
+            expect(underTargetHash <= blockTargetHash).to.be.true;
         });
     });
 
