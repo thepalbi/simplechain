@@ -1,12 +1,12 @@
 import { Block } from "./block";
 
 export class Blockchain {
-	private chain: Block[];
+	public readonly chain: Block[];
 	constructor() {
 		this.chain = [Block.genesis()];
 	}
 
-	addBlock({ block }: { block: Block }) {
+	async addBlock({ block }: { block: Block }) {
 		this.chain.push(block);
 	}
 
