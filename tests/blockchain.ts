@@ -26,6 +26,13 @@ describe("Block", function () {
             expect(result).to.have.length(64);
             expect(result.startsWith("0")).to.be.true;
         });
+
+        it("Should be MAX_HASH_VALUE for difficulty zero", function () {
+            const result = Block.calculateBlockTargetHash({
+                lastBlock: getBlockWithDifficulty({ difficulty: 0 })
+            });
+            expect(result).to.be.equal("f".repeat(64));
+        });
     });
 
     describe("mineBlock()", function () {
