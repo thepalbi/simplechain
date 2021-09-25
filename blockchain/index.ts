@@ -7,7 +7,12 @@ export class Blockchain {
 	}
 
 	async addBlock({ block }: { block: Block }) {
-		this.chain.push(block);
+		try {
+			await Block.validateBlock({ lastBlock: this.lastBlock(), block });
+			this.chain.push(block);
+		} catch (error) {
+			throw error;
+		}
 	}
 
 	lastBlock(): Block {

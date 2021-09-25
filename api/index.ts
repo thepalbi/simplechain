@@ -18,13 +18,18 @@ app.get("/blockchain/mine", async (req, res, next) => {
         res.json({ block });
     } catch (error) {
         console.error("Failed to add mined block to chain: ", error);
-
-        // TODO: Add better error API
-        res.status(500).json({
-            error,
-            message: "Failed to add mined block to chain",
-        });
+        next(error);
     }
+});
+
+// Error handling middleware
+app.use(async (err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("Internal error: ", err);
+
+    // TODO: Implement problem details here!
+    res.status(500).json({
+        message: err.message,
+    });
 });
 
 const PORT = 3000;
