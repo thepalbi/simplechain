@@ -5,7 +5,7 @@ import { PubSub } from "./pubsub";
 
 const app = express();
 const blockchain = new Blockchain();
-const pubSub = new PubSub();
+const pubSub = new PubSub(blockchain);
 
 app.get("/blockchain", (req, res, next) => {
     const { chain } = blockchain;

@@ -1,5 +1,7 @@
 import PubNub from "pubnub";
+import { Blockchain } from "../blockchain";
 import { Block } from "../blockchain/block";
+import { hash } from "../util";
 export interface CredentialsProvider {
     publishKey: string
     subscribeKey: string
@@ -13,9 +15,11 @@ const CHANNELS_MAP = {
 
 export class PubSub {
     private pubNub: PubNub;
+    private blockchain: Blockchain;
 
-    constructor() {
+    constructor(blockchain: Blockchain) {
         this.pubNub = new PubNub(envCredentialsProvider());
+        this.blockchain = blockchain;
         this.subscribeToChannels();
         this.listen();
     }
@@ -38,6 +42,18 @@ export class PubSub {
                 switch (channel) {
                     case CHANNELS_MAP.BLOCK:
                         console.log("Block message: %s", message);
+                        const parsedBlock = JSON.parse(message) as Block;
+                        // Check if the received block was broadcasted by this miner?
+                        if (hash(parsedBlock.blockHeaders) === hash(this.blockchain.lastBlock().blockHeaders)) {
+                            console.log("Block broadcasted Ok!");
+                            return;
+                        }
+                        try {
+                            this.blockchain.addBlock({ block: parsedBlock })
+                            console.log("New block accepted!")
+                        } catch (error) {
+                            console.error("New block rejected: ", error);
+                        }
                         break;
                     default:
                         return;
