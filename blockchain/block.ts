@@ -68,11 +68,11 @@ export class Block {
 	static adjustDifficulty({ lastBlock, timestamp }: { lastBlock: Block, timestamp: number }) {
 		let { difficulty } = lastBlock.blockHeaders;
 
+		if (difficulty < 1) return 1;
+
 		if ((timestamp - lastBlock.blockHeaders.timestamp) > MINE_RATE) {
 			return difficulty - 1;
 		}
-
-		if (difficulty < 1) return 1;
 
 		return difficulty + 1;
 	}
