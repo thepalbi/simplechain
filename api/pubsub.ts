@@ -1,4 +1,5 @@
 import PubNub from "pubnub";
+import { Block } from "../blockchain/block";
 export interface CredentialsProvider {
     publishKey: string
     subscribeKey: string
@@ -32,12 +33,26 @@ export class PubSub {
     private listen() {
         this.pubNub.addListener({
             message: msg => {
-                console.log("New message in channel [%s]. Contents: %s", msg.channel, msg.message);
+                const { channel, message } = msg;
+                console.log("Message received. Channel: %s", channel);
+                switch (channel) {
+                    case CHANNELS_MAP.BLOCK:
+                        console.log("Block message: %s", message);
+                        break;
+                    default:
+                        return;
+                }
             }
         });
     }
-}
 
+    public broadcastBlock({ block }: { block: Block }) {
+        this.publish({
+            channel: CHANNELS_MAP.BLOCK,
+            message: JSON.stringify(block)
+        })
+    }
+}
 
 export function envCredentialsProvider(): CredentialsProvider {
     const publishKey = process.env["PUBNUB_PUBLISH_KEY"];
@@ -50,6 +65,3 @@ export function envCredentialsProvider(): CredentialsProvider {
     }
     return { publishKey, subscribeKey, secretKey }
 }
-
-const pubSub = new PubSub();
-pubSub.publish({channel: CHANNELS_MAP.TEST, message: "holis"});

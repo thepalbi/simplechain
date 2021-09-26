@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon ./build/api",
+    "dev-peer": "nodemon ./build/api --peer",
     "start": "node ./build/api",
     "test": "mocha -r ts-node/register tests/**/*.ts"
   },
