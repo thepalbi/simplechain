@@ -2,6 +2,7 @@ import express from "express";
 import { Blockchain } from "../blockchain";
 import { Block } from "../blockchain/block";
 import { PubSub } from "./pubsub";
+import got from "got";
 
 const app = express();
 const blockchain = new Blockchain();
@@ -35,11 +36,25 @@ app.use(async (err: Error, req: express.Request, res: express.Response, next: ex
     });
 });
 
+const isPeer = process.argv.includes("--peer");
 // If the --peer argv is present, pick a random port between 2000 and 3000
-const PORT = process.argv.includes("--peer") 
+const PORT = isPeer 
     ? Math.floor(2000 + Math.random() * 1000)
     : 3000;
 
-app.listen(PORT, () => {
-    console.log("Listening @ PORT = %d", PORT);
-});
+(async () => {
+    if (isPeer) {
+        console.log("New node! Bootstrapping chain!");
+        await bootstrapChain();
+    }
+
+    app.listen(PORT, () => {
+        console.log("Listening @ PORT = %d", PORT);
+    });
+})();
+
+async function bootstrapChain() {
+    const receivedChain = await got.get("http://localhost:3000/blockchain").json() as Blockchain;
+    blockchain.replaceChain({chain: receivedChain});
+    console.log("Blockchain bootstrapped with: ", JSON.stringify(receivedChain));
+}
