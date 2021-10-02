@@ -69,7 +69,7 @@ export class Transaction {
                     type: TransactionType.CREATE_ACCOUNT,
                     accountData: txProps.account.toJSON(),
                 }
-            })
+            });
         }
     }
 }

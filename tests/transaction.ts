@@ -42,10 +42,10 @@ describe("Transaction", function () {
                 txType: TransactionType.CREATE_ACCOUNT,
                 account: acct1,
             });
-            expect(tx.data).to.be.equal({
-                ...acct1.toJSON(),
-                type: TransactionType.CREATE_ACCOUNT,
-            });
+            expect(tx.data.type).to.be.equal(TransactionType.CREATE_ACCOUNT);
+            expect(tx.data.accountData).not.to.be.null;
+            expect(tx.data.accountData.address).to.be.equal(acct1.address)
+            expect(tx.data.accountData.balance).to.be.equal(1000);
         });
     });
 });
